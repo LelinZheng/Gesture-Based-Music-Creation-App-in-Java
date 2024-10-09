@@ -12,6 +12,7 @@ import java.awt.event.MouseEvent;
 
 public class PaintInk extends WinApp {
     public static Ink.List inkList = new Ink.List();
+    public static String recognize; // not completed??
     public static Shape.Prototype.List pList = new Shape.Prototype.List();
     public PaintInk() {
         super("PainInk", UC.screenWidth, UC.screenHeight);
@@ -23,6 +24,7 @@ public class PaintInk extends WinApp {
         inkList.show(g);
         g.setColor(Color.RED);
         Ink.BUFFER.show(g);
+        g.drawString(recognize,700, 400);
         g.drawString("Point: " + Ink.BUFFER.n, 600, 30);
         if(inkList.size() > 1){
             int last = inkList.size() -1;
@@ -44,6 +46,8 @@ public class PaintInk extends WinApp {
     public void mouseReleased(MouseEvent me){
         Ink.BUFFER.up(me.getX(), me.getY());
         Ink ink = new Ink();
+        Shape s = Shape.recognize(ink); // can fail
+        recognize = "recognized: " + ( s != null ? s.name: "unrecognized");
         Shape.Prototype proto;
         inkList.add(ink);
         if (pList.bestDist(ink.norm) < UC.noMatchDist){

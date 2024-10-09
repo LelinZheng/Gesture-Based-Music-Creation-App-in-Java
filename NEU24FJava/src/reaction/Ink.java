@@ -4,10 +4,11 @@ import java.awt.*;
 import graphics.*;
 import musics.I;
 import musics.UC;
+import java.io.Serializable;
 
 import java.util.ArrayList;
 
-public class Ink implements I.Show {
+public class Ink implements I.Show, Serializable {
     public static Buffer BUFFER = new Buffer();
     public Norm norm;
     public G.VS vs;
@@ -22,7 +23,7 @@ public class Ink implements I.Show {
     public void show(Graphics g) {g.setColor(UC.inkColor); norm.drawAt(g,vs);}
 
     //-----------------Norm----------------
-    public static class Norm extends G.PL{
+    public static class Norm extends G.PL implements Serializable{
         public static final int N = UC.normSampleSize, MAX = UC.normCoordMax;
         public static final G.VS NCS = new G.VS(0, 0, MAX, MAX);
         public Norm(){
@@ -109,7 +110,7 @@ public class Ink implements I.Show {
 
 
     //-------------------------List -------------------
-    public static class List extends ArrayList<Ink> implements I.Show{
+    public static class List extends ArrayList<Ink> implements I.Show, Serializable{
         public void show(Graphics g) {for (Ink ink : this) {ink.show(g);}}
     }
 }

@@ -24,7 +24,7 @@ public class Tetris extends WinApp implements ActionListener {
     public Tetris(){
         super("Tetris", 1000, 700);
         startNewGame();
-        timer = new Timer (30, this);
+        timer = new Timer (20, this);
         timer.start();
     }
     public void startNewGame(){
@@ -35,6 +35,7 @@ public class Tetris extends WinApp implements ActionListener {
     public static int time = 1, iShape = 0;
 
     public void paintComponent(Graphics g){
+
         g.setColor(Color.WHITE);
         time++; if (time == 30){time = 0;shape.drop();}
         unzapWell();
@@ -53,7 +54,7 @@ public class Tetris extends WinApp implements ActionListener {
         if (vk == KeyEvent.VK_RIGHT){shape.slide(G.RIGHT);}
         if (vk == KeyEvent.VK_UP){shape.safeRot();}
         if (vk == KeyEvent.VK_DOWN){shape.drop();}
-        repaint();
+        //repaint(); // commented out
     }
 
     @Override
@@ -69,8 +70,8 @@ public class Tetris extends WinApp implements ActionListener {
     public static void showWell (Graphics g){
         for (int x = 0; x < W; x++){
             for (int y = 0; y < H; y++){
-                g.setColor(color[well[x][y]]);
                 int xx = xM + C * x, yy = yM + C * y;
+                g.setColor(color[well[x][y]]);
                 g.fillRect(xx,yy,C, C);
                 g.setColor(Color.BLACK);
                 g.drawRect(xx,yy,C, C);
@@ -89,7 +90,7 @@ public class Tetris extends WinApp implements ActionListener {
         for (int y = 1; y < H; y++){
             for (int x = 0 ; x < W; x++){
                 if (well[x][y-1] != zap && well[x][y] == zap){
-                    well[x][y] = well[x][y] - 1;
+                    well[x][y] = well[x][y-1];
                     well[x][y-1] = ( y == 1)? iBkColor: zap;
                 }
             }

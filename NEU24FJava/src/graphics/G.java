@@ -1,11 +1,12 @@
 package graphics;
 
 import java.awt.*;
+import java.io.Serializable;
 import java.util.Random;
 
 import static java.lang.reflect.Array.set;
 
-public class G {
+public class G implements Serializable {
     public static void fillBack(Graphics g) {
         g.setColor(Color.WHITE);
         g.fillRect(0, 0, 3000, 3000);
@@ -28,7 +29,7 @@ public class G {
     }
 
     //---------------------------------------V--------------------------------
-    public static class V {
+    public static class V implements Serializable{
         public static Transform T = new Transform();
         public int x, y;
 
@@ -173,7 +174,7 @@ public class G {
     }
 
     //---------------------BBox----------------------
-    public static class BBox {
+    public static class BBox implements Serializable{
         public LoHi h, v; //horizontal and vertical
 
         public BBox() {
@@ -205,7 +206,7 @@ public class G {
     }
 
     // ---------------------PL------------------------
-    public static class PL {
+    public static class PL implements Serializable{
         public V[] points;
 
         public PL(int count) {
