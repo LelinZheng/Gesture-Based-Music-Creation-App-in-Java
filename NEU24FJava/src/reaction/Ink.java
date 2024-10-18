@@ -1,8 +1,8 @@
 package reaction;
 
 import graphics.*;
-import musics.I;
 import musics.UC;
+import musics.I;
 
 import java.awt.*;
 import java.io.Serializable;
@@ -65,7 +65,7 @@ public class Ink implements I.Show, Serializable{
         }
 
         public void clear(){n=0;}
-        public void show(Graphics g){drawN(g,n);bBox.draw(g);}
+        public void show(Graphics g){drawN(g,n);/*bBox.draw(g);*/}
 
         @Override
         public boolean hit(int x, int y) {return true;}
@@ -84,4 +84,3 @@ public class Ink implements I.Show, Serializable{
         public void show(Graphics g) {for(Ink ink: this){ink.show(g);}}
     }
 }
-

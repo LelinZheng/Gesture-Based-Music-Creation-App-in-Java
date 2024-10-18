@@ -113,7 +113,7 @@ public class G{
             for(int i=1;i<n;i++){
                 g.drawLine(points[i-1].x,points[i-1].y,points[i].x,points[i].y);
             }
-            drawNDots(g,n);
+            //drawNDots(g,n);
         }
         public void drawNDots(Graphics g, int n){
             g.setColor(Color.BLUE);
@@ -122,6 +122,18 @@ public class G{
         public void draw(Graphics g){drawN(g,points.length);}
         public void transform(){for(int i=0;i<points.length;i++){points[i].setT(points[i]);}}
     }
+    //------------------------HC (Hierarchical coordinates)-------------------------------
+    public static class HC{
+        public static HC ZERO = new HC(null, 0);
+        public HC dad;
+        public int dv;
+        public HC(HC dad, int dv){
+            this.dad = dad;
+            this.dv = dv;
+        }
+        public int v(){
+            return dad == ZERO? dv: dad.v() + dv;
+        }
+
+    }
 }
-
-
