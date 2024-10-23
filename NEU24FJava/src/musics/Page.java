@@ -12,6 +12,7 @@ public class Page extends Mass {
     public int sysGap;
     public G.HC pageTop;
     public Sys.List sysList= new Sys.List();
+    public int maxH = 0;
 
     public Page(int y){
         super("BACK");
@@ -19,6 +20,7 @@ public class Page extends Mass {
         pageTop = new G.HC(G.HC.ZERO, y);
         G.HC sysTop = new G.HC(pageTop, 0);
         sysList.add(new Sys(this, sysTop));
+        updateMaxH();
 
         addReaction(new Reaction("W-W") { // Adding a new staff to first system
             public int bid(Gesture g) {
@@ -43,6 +45,11 @@ public class Page extends Mass {
         });
 
 
+    }
+    public void updateMaxH(){
+        Sys sys = sysList.get(0);
+        int newH = sys.staffs.get(sys.staffs.size()-1).fmt.H;
+        if (maxH < newH){maxH = newH;}
     }
 
     public void addNewSys(int y){ // called from page reaction so one sys EXISTS!!

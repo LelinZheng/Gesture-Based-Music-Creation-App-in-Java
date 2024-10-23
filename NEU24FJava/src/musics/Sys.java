@@ -17,7 +17,7 @@ public class Sys extends Mass {
         iSys = page.sysList.size();
         staffs = new Staff.List(sysTop);
         if (iSys == 0){
-            staffs.add(new Staff(this, 0, new G.HC(sysTop, 0)));
+            staffs.add(new Staff(this, 0, new G.HC(sysTop, 0), new Staff.Fmt(5,8)));
         }else{
             Sys oldSys = page.sysList.get(0);
             for(Staff oldStaff: oldSys.staffs){
@@ -38,7 +38,8 @@ public class Sys extends Mass {
     public void addNewStaff(int y){
         int off = y - staffs.sysTop();
         G.HC staffTop = new G.HC(staffs.sysTop, off);
-        staffs.add(new Staff(this, staffs.size(),staffTop));
+        staffs.add(new Staff(this, staffs.size(),staffTop, new Staff.Fmt(5,8)));
+        page.updateMaxH();
     }
 
     //-------------------------List--------------------------
