@@ -54,10 +54,59 @@ public class Staff extends Mass {
                 fmt.toggleBarContinues();
             }
         });
+
+        addReaction(new Reaction("SW-SW") { //adds note to staff
+            @Override
+            public int bid(Gesture g){
+                Page PAGE = sys.page;
+                int x = g.vs.xM(), y = g.vs.yM();
+                if (x < PAGE.margins.left || x > PAGE.margins.right){return UC.noBid;}
+                int H = Staff.this.fmt.H, top = Staff.this.yTop()-H, bot = Staff.this.yBot()+H;
+                if (y < top || y > bot){return UC.noBid;}
+                return 10;
+            }
+            @Override
+            public void act(Gesture g) {
+                new Head(Staff.this,g.vs.xM(),g.vs.yM());
+
+            }
+        });
+        addReaction(new Reaction("W-S") { // Add quarter rest
+            public int bid(Gesture g) {
+                int x = g.vs.xL(), y = g.vs.yM(); // Quesion?????
+                if (x < sys.page.margins.left || x > sys.page.margins.right){return UC.noBid;}
+                int H = fmt.H, top = yTop() - H, bot = yBot() + H;
+                if (y < top || y > bot){return UC.noBid;}
+                return 10;
+            }
+            public void act(Gesture g) {
+                Time t = Staff.this.sys.getTime(g.vs.xL());
+                new Rest(Staff.this, t);
+            }
+        });
+        addReaction(new Reaction("E-S") { // Add 1/8 rest
+            public int bid(Gesture g) {
+                int x = g.vs.xL(), y = g.vs.yM();
+                if (x < sys.page.margins.left || x > sys.page.margins.right){return UC.noBid;}
+                int H = fmt.H, top = yTop() - H, bot = yBot() + H;
+                if (y < top || y > bot){return UC.noBid;}
+                return 10;
+            }
+            public void act(Gesture g) {
+                Time t = Staff.this.sys.getTime(g.vs.xL());
+                (new Rest(Staff.this, t)).nFlag = 1;
+            }
+        });
     }
 
     public int yTop(){return staffTop.v();}
-    public int yOfLine(int Line){return yTop() + Line * fmt.H;}
+    public int yOfLine(int line){return yTop() + line * fmt.H;}
+    public int lineOfY(int y){
+        int H = fmt.H;
+        int bias = 100;
+        int top = yTop() - H*bias;
+        return (y - top + H/2)/H - bias;  // adding the half H to do rounding instead of floor division
+    }
     public int yBot(){return yOfLine(2 * (fmt.nLines - 1));}
 
     public Staff copy(Sys newSys){
