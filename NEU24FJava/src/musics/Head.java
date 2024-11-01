@@ -49,6 +49,23 @@ public class Head extends Mass implements Comparable<Head>{
                 }
             }
         });
+        addReaction(new Reaction("DOT") {
+            @Override
+            public int bid(Gesture g) {
+                int xH = x(), yH = y(), H = staff.fmt.H, W = w();
+                int x = g.vs.xM(), y = g.vs.yM();
+                if (Head.this.stem == null){return UC.noBid;}
+                if (x < xH || x > xH + 2 * W || y < yH - H || y > yH + H){
+                    return UC.noBid;
+                }
+                return Math.abs(xH + W - x) + Math.abs(yH - y);
+            }
+
+            @Override
+            public void act(Gesture g) {
+                Head.this.stem.cycleDot();
+            }
+        });
     }
     public int w(){return 24 * staff.fmt.H/10;} // Width of note head
     public int y(){return staff.yOfLine(line);}
@@ -71,6 +88,12 @@ public class Head extends Mass implements Comparable<Head>{
         if (stem != null && stem.heads.size() != 0 && this == stem.firstHead()){g.setColor(Color.RED);}
         int H = staff.fmt.H;
         (forcedGlyph != null? forcedGlyph:normalGlyph()).showAt(g, H, x(), y());
+        if (stem != null){
+            int off = UC.AugDotOffset, sp = UC.AugDotSpacing;
+            for (int i = 0; i < stem.nDot; i++){
+                g.fillOval(x() + off + i * sp, y() -3 * H/2, H*2/3,H*2/3);
+            }
+        }
 
     }
 

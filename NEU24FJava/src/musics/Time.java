@@ -27,6 +27,7 @@ public class Time {
             System.out.println("Empty head list after stem");
         }else{
             s.setWrongSides();
+            s.staff.sys.stems.addStem(s);
         }
     }
     // -------------------------List----------------------------
