@@ -73,7 +73,7 @@ public class Staff extends Mass {
         });
         addReaction(new Reaction("W-S") { // Add quarter rest
             public int bid(Gesture g) {
-                int x = g.vs.xL(), y = g.vs.yM(); // Quesion?????
+                int x = g.vs.xL(), y = g.vs.yM();
                 if (x < sys.page.margins.left || x > sys.page.margins.right){return UC.noBid;}
                 int H = fmt.H, top = yTop() - H, bot = yBot() + H;
                 if (y < top || y > bot){return UC.noBid;}

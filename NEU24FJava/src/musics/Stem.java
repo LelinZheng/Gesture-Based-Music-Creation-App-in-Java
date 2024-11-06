@@ -13,9 +13,13 @@ public class Stem extends Duration implements Comparable<Stem>{
     public boolean isUp = true;
     public Beam beam = null;
 
-    public Stem (Staff staff, boolean up){
+    public Stem (Staff staff, Head.List heads, boolean up){
         this.staff = staff;
         isUp = up;
+        for(Head h: heads){h.unStem();h.stem = this;}
+        this.heads = heads;
+        staff.sys.stems.addStem(this);
+        setWrongSides();
 
         addReaction(new Reaction("E-E") {
             @Override
@@ -25,10 +29,13 @@ public class Stem extends Duration implements Comparable<Stem>{
                 if (x1 > xS || x2 < xS){return UC.noBid;}
                 int y1 = Stem.this.yL(), y2 = Stem.this.yH();
                 if (y < y1 || y > y2){return UC.noBid;}
-                return Math.abs(y - (y1 + y2)/2);
+                int res = Math.abs(y - (y1 + y2)/2) + 60; //Must let sys E-E underbid this
+                System.out.println("Stem E-E: Underbid " + res);
+                return res;
             }
             @Override
             public void act(Gesture g) {
+                System.out.println("Stem E-E: WTF?");
                 Stem.this.incFlag();
 
             }
@@ -49,11 +56,30 @@ public class Stem extends Duration implements Comparable<Stem>{
             }
         });
     }
+    public static Stem getStem(Staff staff, Time time, int y1, int y2, boolean up){
+        Head.List heads = new Head.List();
+        for (Head h : time.heads){int yH  = h.y(); if (yH > y1 && yH < y2){heads.add(h);}}
+        if(heads.size() == 0){return null;}
+        Beam b = internalStem(staff.sys, time.x, y1, y2);
+        Stem res = new Stem(staff, heads, up);
+        if(b != null){b.addStem(res);res.nFlag = 1;}
+        return res;
+    }
+    public static Beam internalStem(Sys sys, int x, int y1, int y2){
+        for (Stem s: sys.stems){
+            if(s.beam != null && s.x()<x && s.yL() < y2 && s.yH()>y1){
+                int bX = s.beam.first().x(), bY = s.beam.first().yBeamEnd();
+                int eX = s.beam.last().x(), eY = s.beam.last().yBeamEnd();
+                if (Beam.verticalLineCrossesSegment(x,y1,y2,bX,bY,eX,eY)){return s.beam;}
+            }
+        }
+        return null;
+    }
     public void show(Graphics g){
         if(nFlag >= -1 && heads.size()>0){
             int x = x(), h = staff.fmt.H, yH = yFirstHead(), yB = yBeamEnd();
             g.drawLine(x,yH,x,yB);
-            if (nFlag>0){
+            if (nFlag>0 && beam == null){
                 if (nFlag == 1){(isUp? Glyph.FLAG1D:Glyph.FLAG1U).showAt(g,h,x,yB);}
                 if (nFlag == 2){(isUp? Glyph.FLAG2D:Glyph.FLAG2U).showAt(g,h,x,yB);}
                 if (nFlag == 3){(isUp? Glyph.FLAG3D:Glyph.FLAG3U).showAt(g,h,x,yB);}
@@ -127,5 +153,12 @@ public class Stem extends Duration implements Comparable<Stem>{
         }
         public void sort(){Collections.sort(this);}
         public boolean fastReject(int y){return y > yMax || y < yMin;}
+        public ArrayList<Stem> allIntersectors(int x1, int y1, int x2, int y2){
+            ArrayList<Stem> res = new ArrayList<Stem>();
+            for (Stem s : this){
+                if (Beam.verticalLineCrossesSegment(s.x(), s.yL(),s.yH(),x1,y1,x2,y2)){res.add(s);}
+            }
+            return res;
+        }
     }
 }
