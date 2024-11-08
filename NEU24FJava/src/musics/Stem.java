@@ -25,7 +25,7 @@ public class Stem extends Duration implements Comparable<Stem>{
             @Override
             public int bid(Gesture g) {
                 int y = g.vs.yM(), x1 = g.vs.xL(), x2 = g.vs.xH();
-                int xS = Stem.this.heads.get(0).time.x;
+                int xS = Stem.this.x();
                 if (x1 > xS || x2 < xS){return UC.noBid;}
                 int y1 = Stem.this.yL(), y2 = Stem.this.yH();
                 if (y < y1 || y > y2){return UC.noBid;}
@@ -44,7 +44,7 @@ public class Stem extends Duration implements Comparable<Stem>{
             @Override
             public int bid(Gesture g) {
                 int y = g.vs.yM(), x1 = g.vs.xL(), x2 = g.vs.xH();
-                int xS = Stem.this.heads.get(0).time.x;
+                int xS = Stem.this.x();
                 if (x1 > xS || x2 < xS){return UC.noBid;}
                 int y1 = Stem.this.yL(), y2 = Stem.this.yH();
                 if (y < y1 || y > y2){return UC.noBid;}
@@ -53,6 +53,9 @@ public class Stem extends Duration implements Comparable<Stem>{
             @Override
             public void act(Gesture g) {
                 Stem.this.decFlag();
+                if (nFlag == 0 && beam != null){
+                    beam.deleteBeam();
+                }
             }
         });
     }
@@ -91,8 +94,13 @@ public class Stem extends Duration implements Comparable<Stem>{
     public Head lastHead(){return heads.get(isUp? 0:heads.size() -1);}
     public int yL(){return isUp? yBeamEnd():yFirstHead();}
     public int yH(){return isUp? yFirstHead():yBeamEnd();}
-    public int yFirstHead(){Head h = firstHead(); return h.staff.yOfLine(h.line);}
+    public int yFirstHead(){
+        if (heads.size() == 0){return 200;}
+        Head h = firstHead();
+        return h.staff.yOfLine(h.line);
+    }
     public int yBeamEnd(){
+        if (heads.size() == 0){return 100;}
         if (isInternalStem()){
             beam.setMasterBeam();
             return Beam.yOfX(x());
@@ -110,10 +118,11 @@ public class Stem extends Duration implements Comparable<Stem>{
         if (this == beam.first() || this == beam.last()){return false;}
         return true;
     }
-    public int x(){Head h = firstHead(); return h.time.x+(isUp?h.w():0);}
+    public int x(){if (heads.size() == 0){return 100;} Head h = firstHead(); return h.time.x+(isUp?h.w():0);}
 
     public void deleteStem() {
         staff.sys.stems.remove(this);
+        if (beam != null){beam.removeStem(this);}
         deleteMass();
     }
 

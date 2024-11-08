@@ -7,12 +7,14 @@ import reaction.Reaction;
 
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.Collections;
 
 public class Staff extends Mass {
     public Sys sys;
     public int iStaff;
     public G.HC staffTop;
     public Staff.Fmt fmt;
+    public Clef.List clefs = null;
 
     public Staff(Sys sys, int iStaff, G.HC staffTop, Staff.Fmt fmt){
         super("BACK");
@@ -97,6 +99,53 @@ public class Staff extends Mass {
                 (new Rest(Staff.this, t)).nFlag = 1;
             }
         });
+
+        addReaction(new Reaction("SW-SE") { //G-clef
+            @Override
+            public int bid(Gesture g) {
+                int dTop = Math.abs(g.vs.yL() - yTop()), dBot = Math.abs(g.vs.yH()- yBot());
+                if (dTop + dBot > 60){return UC.noBid;}
+                return dTop + dBot;
+            }
+            @Override
+            public void act(Gesture g) {
+                if (Staff.this.initialClef() == null){
+                    setInitialClef(Glyph.CLEF_G);
+                }else{
+                    addNewClef(Glyph.CLEF_G,g.vs.xM());
+                }
+
+            }
+        });
+        addReaction(new Reaction("SE-SW") { //bass-clef
+            @Override
+            public int bid(Gesture g) {
+                int dTop = Math.abs(g.vs.yL() - yTop()), dBot = Math.abs(g.vs.yH()- yBot());
+                if (dTop + dBot > 60){return UC.noBid;}
+                return dTop + dBot;
+            }
+            @Override
+            public void act(Gesture g) {
+                if (Staff.this.initialClef() == null){
+                    setInitialClef(Glyph.CLEF_F);
+                }else{
+                    addNewClef(Glyph.CLEF_F,g.vs.xM());
+                }
+
+            }
+        });
+    }
+
+    public void setInitialClef(Glyph glyph) {
+        Staff s = this, ps = previousStaff();
+        while(ps != null){s = ps; ps = s.previousStaff();}
+        s.clefs = new Clef.List();
+        s.clefs.add(new Clef(s, -900, glyph));
+    }
+    public void addNewClef(Glyph glyph, int x){
+        if (clefs == null){clefs = new Clef.List();}
+        clefs.add(new Clef(this, x, glyph));
+        Collections.sort(clefs);
     }
 
     public int yTop(){return staffTop.v();}
@@ -119,7 +168,25 @@ public class Staff extends Mass {
         for (int i = 0; i < fmt.nLines; i++){
             g.drawLine(x1, y+i*h, x2,y+i*h);
         }
+        Clef clef = initialClef();
+        int x = sys.page.margins.left + UC.initialClefOffset;
+        if (clef != null){clef.glyph.showAt(g, fmt.H, x,yOfLine(4));}
     }
+
+    public Staff previousStaff(){
+        return sys.iSys == 0? null:sys.page.sysList.get(sys.iSys-1).staffs.get(iStaff);
+    }
+    public Clef lastClef(){return clefs == null ? null:clefs.get(clefs.size()-1);}
+    public Clef firstClef(){return clefs == null ? null:clefs.get(0);}
+    public Clef initialClef(){
+        Staff s = this, ps = previousStaff();
+        while(ps != null && ps.clefs==null){
+            s = ps;
+            ps = s.previousStaff();
+        }
+        return ps==null? s.firstClef():ps.lastClef();
+    }
+
 
 
     //-----------------------Fmt--------------------------
