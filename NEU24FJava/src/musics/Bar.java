@@ -1,5 +1,6 @@
 package musics;
 
+import graphics.G;
 import reaction.Gesture;
 import reaction.Mass;
 import reaction.Reaction;
@@ -11,6 +12,7 @@ public class Bar extends Mass {
     // 0 = single, 1 = double, 2 = fine, >3 = repeat
     public Sys sys;
     public int x, barType = 0;
+    public Key key = null;
     public Bar(Sys sys, int x){
         super("BACK");
         this.sys = sys;
@@ -52,7 +54,73 @@ public class Bar extends Mass {
 
             }
         });
+        addReaction(new Reaction("E-E") {
+            @Override
+            public int bid(Gesture g) {
+                if (barType != 1){return UC.noBid;}
+                int x1 = g.vs.xL(), x2 = g.vs.xH();
+                if (x1 > x|| x2 < x){return UC.noBid;}
+                int y = g.vs.yM();
+                if (y < sys.yTop() || y > sys.yBot()){return UC.noBid;}
+                return Math.abs(x - (x1 + x2)/2);
+            }
+            @Override
+            public void act(Gesture g) {
+                Bar.this.incKey();
+            }
+        });
+        addReaction(new Reaction("W-W") {
+            @Override
+            public int bid(Gesture g) {
+                if (barType != 1){return UC.noBid;}
+                int x1 = g.vs.xL(), x2 = g.vs.xH();
+                if (x1 > x|| x2 < x){return UC.noBid;}
+                int y = g.vs.yM();
+                if (y < sys.yTop() || y > sys.yBot()){return UC.noBid;}
+                return Math.abs(x - (x1 + x2)/2);
+            }
+            @Override
+            public void act(Gesture g) {
+                Bar.this.decKey();
+            }
+        });
+        addReaction(new Reaction("S-N") {
+            @Override
+            public int bid(Gesture g) {
+                int x = g.vs.xM(), y = g.vs.yL();
+                int y1 = sys.yTop(), y2 = sys.yBot();
+                if (y < y1 || y> y2){return UC.noBid;}
+                int aX = Bar.this.x;
+                int dX = Math.abs(x - aX); // we are not checking for dy so we have 16 to make up for missing y
+                int dist = dX + 16;
+                return dist > 50 ? UC.noBid: dist;
+            }
+
+            @Override
+            public void act(Gesture g) {
+                deleteBar();
+            }
+        });
     }
+
+    private void deleteBar() {
+        deleteMass();
+    }
+
+    private void decKey() {
+        if (key == null){key = new Key();}
+        if (key.glyph == Glyph.NATURAL){key.glyph = Glyph.FLAT; key.n = -1; return;}
+        if (key.glyph==Glyph.SHARP){key.glyph=Glyph.NATURAL;return;}
+        if (key.n > -7){key.n--;}
+    }
+
+    private void incKey() {
+        if (key == null){key = new Key();}
+        if (key.glyph == Glyph.NATURAL){key.glyph = Glyph.SHARP; key.n = 1; return;}
+        if (key.glyph == Glyph.FLAT){key.glyph=Glyph.NATURAL;return;}
+        if (key.n < 7){key.n++;}
+    }
+
     public void show(Graphics g){
         int sysTop = sys.yTop(), y1 = 0, y2 = 0;
         boolean justSawBreak = true;
@@ -65,6 +133,7 @@ public class Bar extends Mass {
             if (justSawBreak){drawLines(g,x,y1,y2);}
             if (barType > 3){drawDots(g,x,staffTop);}
         }
+        if (key != null && barType == 1){key.drawOnSys(g,sys,x+UC.barKeyOffset);}
     }
     public void drawLines(Graphics g, int x, int y1, int y2){
         int H = sys.page.maxH;

@@ -187,6 +187,15 @@ public class Staff extends Mass {
         return ps==null? s.firstClef():ps.lastClef();
     }
 
+    public Clef clefAtX(int x) {
+        Clef iClef = initialClef();
+        if (iClef == null){return null;}
+        Clef ret = iClef;
+        for (Clef clef: clefs){
+            if (clef.x < x){ret = clef;}
+        }
+        return ret;
+    }
 
 
     //-----------------------Fmt--------------------------

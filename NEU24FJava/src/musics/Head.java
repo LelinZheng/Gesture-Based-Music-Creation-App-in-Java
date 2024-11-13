@@ -14,6 +14,7 @@ public class Head extends Mass implements Comparable<Head>{
     public Glyph forcedGlyph = null;
     public Stem stem = null;
     public boolean wrongSide;
+    public Accid accid = null;
 
     public Head(Staff staff, int x, int y){
         super("NOTE");
@@ -67,7 +68,74 @@ public class Head extends Mass implements Comparable<Head>{
                 Head.this.stem.cycleDot();
             }
         });
+        addReaction(new Reaction("NE-SE") { //up arrow raises sharp
+            @Override
+            public int bid(Gesture g) {
+                int x = g.vs.xM(), y = g.vs.yL();
+                int hX = Head.this.x() + Head.this.w()/2;
+                int hY = Head.this.y();
+                int dX = Math.abs(x - hX), dY = Math.abs(y - hY);
+                int dist = dX + dY;
+                return dist > 50? UC.noBid: dist;
+
+            }
+            @Override
+            public void act(Gesture g) {
+                Head.this.accidUp();
+
+            }
+        });
+        addReaction(new Reaction("SE-NE") { //down arrow lowers (flats)
+            @Override
+            public int bid(Gesture g) {
+                int x = g.vs.xM(), y = g.vs.yL();
+                int hX = Head.this.x() + Head.this.w()/2;
+                int hY = Head.this.y();
+                int dX = Math.abs(x - hX), dY = Math.abs(y - hY);
+                int dist = dX + dY;
+                return dist > 50? UC.noBid: dist;
+
+            }
+            @Override
+            public void act(Gesture g) {
+                Head.this.accidDown();
+
+            }
+        });
+        addReaction(new Reaction("S-N") { //delete on this thing
+            @Override
+            public int bid(Gesture g) {
+                int x = g.vs.xM(), y = g.vs.yL();
+                int aX = Head.this.x() + Head.this.w()/2,aY = Head.this.y();
+                int dX = Math.abs(x-aX), dY = Math.abs(y-aY), dist = dX + dY;
+                return dist> 50? UC.noBid:dist;
+            }
+
+            @Override
+            public void act(Gesture g) {
+                Head.this.deleteHead();
+            }
+        });
     }
+
+    public void deleteHead() {
+        if (accid!= null){accid.deleteAccid();}
+        unStem();
+        time.heads.remove(this);
+        deleteMass();
+
+    }
+
+    private void accidUp() {
+        if (accid == null){accid = new Accid(this, Accid.SHARP);return;}
+        if (accid.iGlyph < 4){accid.iGlyph++;}
+    }
+
+    private void accidDown() {
+        if (accid == null){accid = new Accid(this, Accid.FLAT);return;}
+        if (accid.iGlyph > 0 ){accid.iGlyph--;}
+    }
+
     public int w(){return 24 * staff.fmt.H/10;} // Width of note head
     public int y(){return staff.yOfLine(line);}
     public int x(){
